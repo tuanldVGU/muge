@@ -11,3 +11,33 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.piano_wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #191919;
+  color: #fff;
+  flex-direction: column;
+}
+
+.btn_group {
+  margin: 40px 0;
+}
+
+.btn_group button{
+  border: none;
+  background-color: transparent;
+  color: #fff;
+  font-size: 30px;
+  margin: 0 15px;
+}
+
+.btn_group button:hover{
+  color: #ECDBBA;
+}
+
+.active {
+  color: #C84B31;
+}
