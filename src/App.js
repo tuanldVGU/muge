@@ -9,6 +9,7 @@ import { faPlay } from '@fortawesome/free-solid-svg-icons'
 import { faStop } from '@fortawesome/free-solid-svg-icons'
 import { faCircleArrowDown } from '@fortawesome/free-solid-svg-icons'
 import { faRotateLeft } from '@fortawesome/free-solid-svg-icons'
+import { faCloudBolt } from '@fortawesome/free-solid-svg-icons';
 
 import {PianoWithRecording} from './PianoWithRecording'
 
@@ -17,6 +18,7 @@ import React from 'react'
 import _ from 'lodash';
 
 import { Midi } from '@tonejs/midi'
+import axios from 'axios';
 
 const firstNote = MidiNumbers.fromNote('c3');
 const lastNote = MidiNumbers.fromNote('f5');
@@ -126,6 +128,35 @@ class App extends React.Component {
     link.click();
   }
 
+  onGenerate = () => {
+    const data = this.state.recording.events.map(x => ({
+      pitch:x.midiNumber,
+      start:0,
+      end:x.duration,
+      step: x.time,
+      duration: x.duration
+    }))
+
+    const url = "http://run-model.azurewebsites.net"
+
+    axios.post(url,data).then(res => {
+      console.log(res)
+    })
+    // const midi = new Midi()
+    // const track = midi.addTrack()
+    // this.state.recording.events.forEach(x =>{
+    //   track.addNote({
+    //     midi : x.midiNumber,
+    //     time : x.time,
+    //     duration: x.duration
+    //   })
+    // })
+    // const link=document.createElement('a');
+    // link.href=window.URL.createObjectURL(new Blob([midi.toArray()]))
+    // link.download="output.mid";
+    // link.click();
+  }
+
   render() {
     return(
       <div className='piano_wrapper'>
@@ -151,6 +182,7 @@ class App extends React.Component {
             <button type='button' onClick={e => this.onClickStop()} className={this.state.recording.mode === 'PLAYING' ? 'active' : ''}><FontAwesomeIcon icon={faStop}/></button>
             <button type='button' onClick={e => this.onClickClear()}><FontAwesomeIcon icon={faRotateLeft}/></button>
             <button type='button' onClick={e => this.onCreate()}><FontAwesomeIcon icon={faCircleArrowDown}/></button>
+            <button type='button' onClick={e => this.onGenerate()}><FontAwesomeIcon icon={faCloudBolt}/></button>
         </div>
         <div className="mt-5">
           <strong>Recorded notes</strong>
