@@ -113,7 +113,7 @@ class App extends React.Component {
   onCreate = () => {
     const midi = new Midi()
     const track = midi.addTrack()
-    this.state.recording.events.map(x =>{
+    this.state.recording.events.forEach(x =>{
       track.addNote({
         midi : x.midiNumber,
         time : x.time,
