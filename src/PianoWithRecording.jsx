@@ -46,12 +46,8 @@ export const PianoWithRecording = (props) => {
     });
     
     setRecord({
-      ...record,
-      recording: {
-        ...record.recording,
         events: record.recording.events.concat(newEvents),
         currentTime: record.recording.currentTime + duration,
-      }
     });
   }
 
