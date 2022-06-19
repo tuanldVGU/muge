@@ -129,34 +129,44 @@ class App extends React.Component {
   }
 
   onGenerate = () => {
-    const data = this.state.recording.events.map(x => ({
-      pitch:x.midiNumber,
-      start:0,
-      end:x.duration,
-      step: x.time,
-      duration: x.duration
-    }))
+    const data = {
+      pitch: {},
+      start: {},
+      end: {},
+      step: {},
+      duration: {}
+    }
+    this.state.recording.events.forEach((x,i) => {
+      data.pitch[`${i}`] = x.midiNumber
+      data.start[`${i}`] = 0
+      data.end[`${i}`] = x.duration
+      data.step[`${i}`] = x.time
+      data.duration[`${i}`] = x.duration
+    })
 
-    console.log(data)
+    console.log(JSON.stringify(data))
 
     const url = "https://run-model.azurewebsites.net"
 
-    axios.post(url,data).then(res => {
-      console.log(res)
+    axios.post(url,data,{
+      headers:{
+        'Access-Control-Allow-Origin': '*'
+      }
+    }).then(res => {
+      const midi = new Midi()
+      const track = midi.addTrack()
+      res.pitch.keys().forEach(x =>{
+        track.addNote({
+          midi : res.pitch[x],
+          time : res.step[x],
+          duration: res.duration[x]
+        })
+      })
+      const link=document.createElement('a');
+      link.href=window.URL.createObjectURL(new Blob([midi.toArray()]))
+      link.download="output.mid";
+      link.click();
     })
-    // const midi = new Midi()
-    // const track = midi.addTrack()
-    // this.state.recording.events.forEach(x =>{
-    //   track.addNote({
-    //     midi : x.midiNumber,
-    //     time : x.time,
-    //     duration: x.duration
-    //   })
-    // })
-    // const link=document.createElement('a');
-    // link.href=window.URL.createObjectURL(new Blob([midi.toArray()]))
-    // link.download="output.mid";
-    // link.click();
   }
 
   render() {
@@ -188,7 +198,7 @@ class App extends React.Component {
         </div>
         <div className="mt-5">
           <strong>Recorded notes</strong>
-          <div>{JSON.stringify(this.state.recording.events)}</div>
+          <div style={{maxHeight: 500}}>{JSON.stringify(this.state.recording.events)}</div>
         </div>
       </div>
     );
