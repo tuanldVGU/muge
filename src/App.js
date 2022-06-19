@@ -142,12 +142,14 @@ class App extends React.Component {
       step: {},
       duration: {}
     }
+    let prev = 0
     this.state.recording.events.forEach((x,i) => {
       data.pitch[`${i}`] = x.midiNumber
-      data.start[`${i}`] = 0
-      data.end[`${i}`] = x.duration
-      data.step[`${i}`] = x.time
+      data.start[`${i}`] = x.time
+      data.end[`${i}`] = x.time + x.duration
+      data.step[`${i}`] =  x.time - prev
       data.duration[`${i}`] = x.duration
+      prev =  x.time
     })
 
     const url = "https://run-model.azurewebsites.net"
@@ -159,13 +161,18 @@ class App extends React.Component {
     }).then(res => {
       const midi = new Midi()
       const track = midi.addTrack()
+      let prev = 0
       Object.keys(res.data.pitch).forEach(x =>{
+        prev = prev + res.data.step[x]
         track.addNote({
           midi : res.data.pitch[x],
-          time : res.data.step[x],
-          duration: res.data.duration[x]
+          time : res.data.start[x],
+          duration: res.data.duration[x],
+          velocity: 1,
+          noteOffVelocity: 100
         })
       })
+      midi.velocity = 100
       const link=document.createElement('a');
       link.href=window.URL.createObjectURL(new Blob([midi.toArray()]))
       link.download="output.mid";
@@ -205,7 +212,7 @@ class App extends React.Component {
             <button type='button' onClick={e => this.onCreate()}><FontAwesomeIcon icon={faCircleArrowDown}/></button>
             <button type='button' onClick={e => this.onGenerate()}><FontAwesomeIcon icon={faCloudBolt}/></button>
         </div>
-        {this.state.loading == true ? <progress class="progress is-small is-primary" max="100">15%</progress> : <></>}
+        {this.state.loading == true ? <progress className="progress is-small is-primary" max="100">15%</progress> : <></>}
         <div className="mt-5">
           <strong>Recorded notes</strong>
           <div style={{maxHeight: 200, overflow: 'hidden'}}>{JSON.stringify(this.state.recording.events)}</div>
