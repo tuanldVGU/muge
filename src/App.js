@@ -37,7 +37,8 @@ const DEFAULT_RECORD = {
     events: [],
     currentTime: 0,
     currentEvents: [],
-  }
+  },
+  loading: false
 }
 
 class App extends React.Component {
@@ -61,6 +62,7 @@ class App extends React.Component {
   setRecording = value => {
     this.setState({
       recording: Object.assign({}, this.state.recording, value),
+      loading: this.state.loading
     });
   };
 
@@ -129,6 +131,10 @@ class App extends React.Component {
   }
 
   onGenerate = () => {
+    this.setState({
+     ...this.state,
+     loading: true
+    });
     const data = {
       pitch: {},
       start: {},
@@ -144,8 +150,6 @@ class App extends React.Component {
       data.duration[`${i}`] = x.duration
     })
 
-    console.log(JSON.stringify(data))
-
     const url = "https://run-model.azurewebsites.net"
 
     axios.post(url,data,{
@@ -153,19 +157,25 @@ class App extends React.Component {
         'Access-Control-Allow-Origin': '*'
       }
     }).then(res => {
+      console.log(res)
       const midi = new Midi()
       const track = midi.addTrack()
-      res.pitch.keys().forEach(x =>{
+      Object.keys(res.data.pitch).forEach(x =>{
         track.addNote({
-          midi : res.pitch[x],
-          time : res.step[x],
-          duration: res.duration[x]
+          midi : res.data.pitch[x],
+          time : res.data.step[x],
+          duration: res.data.duration[x]
         })
       })
       const link=document.createElement('a');
       link.href=window.URL.createObjectURL(new Blob([midi.toArray()]))
       link.download="output.mid";
       link.click();
+    }).finally(()=>{
+      this.setState({
+        ...this.state,
+        loading: false
+       });
     })
   }
 
@@ -196,9 +206,10 @@ class App extends React.Component {
             <button type='button' onClick={e => this.onCreate()}><FontAwesomeIcon icon={faCircleArrowDown}/></button>
             <button type='button' onClick={e => this.onGenerate()}><FontAwesomeIcon icon={faCloudBolt}/></button>
         </div>
+        {this.state.loading == true ? <progress class="progress is-small is-primary" max="100">15%</progress> : <></>}
         <div className="mt-5">
           <strong>Recorded notes</strong>
-          <div style={{maxHeight: 500}}>{JSON.stringify(this.state.recording.events)}</div>
+          <div style={{maxHeight: 200, overflow: 'hidden'}}>{JSON.stringify(this.state.recording.events)}</div>
         </div>
       </div>
     );
