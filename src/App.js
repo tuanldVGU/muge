@@ -157,7 +157,6 @@ class App extends React.Component {
         'Access-Control-Allow-Origin': '*'
       }
     }).then(res => {
-      console.log(res)
       const midi = new Midi()
       const track = midi.addTrack()
       Object.keys(res.data.pitch).forEach(x =>{
