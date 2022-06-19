@@ -137,7 +137,9 @@ class App extends React.Component {
       duration: x.duration
     }))
 
-    const url = "http://run-model.azurewebsites.net"
+    console.log(data)
+
+    const url = "https://run-model.azurewebsites.net"
 
     axios.post(url,data).then(res => {
       console.log(res)
