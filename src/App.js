@@ -152,7 +152,8 @@ class App extends React.Component {
       prev =  x.time
     })
 
-    const url = "https://run-model.azurewebsites.net"
+    // const url = "https://run-model.azurewebsites.net"
+    const url = "https://note-prediction.herokuapp.com/"
 
     axios.post(url,data,{
       headers:{
